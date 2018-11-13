@@ -3,25 +3,23 @@
 #include <SPI.h>
 #include "SW_SPI.h"
 
-TMC2130Stepper::TMC2130Stepper(uint16_t pinCS) : _pinCS(pinCS) { _started = false; }
+TMC2130Stepper::TMC2130Stepper(uint16_t pinCS) : _pinCS(pinCS), uses_sw_spi(false) {}
 
-TMC2130Stepper::TMC2130Stepper(uint16_t pinEN, uint16_t pinDIR, uint16_t pinStep, uint16_t pinCS) {
-	_started = false;
-	_pinEN = pinEN;
-	_pinSTEP = pinStep;
-	_pinCS = pinCS;
-	_pinDIR = pinDIR;
-}
+TMC2130Stepper::TMC2130Stepper(uint16_t pinEN, uint16_t pinDIR, uint16_t pinStep, uint16_t pinCS) :
+	_pinEN(pinEN),
+	_pinSTEP(pinStep),
+	_pinCS(pinCS),
+	_pinDIR(pinDIR),
+	uses_sw_spi(false)
+	{}
 
-TMC2130Stepper::TMC2130Stepper(uint16_t pinEN, uint16_t pinDIR, uint16_t pinStep, uint16_t pinCS, uint16_t pinMOSI, uint16_t pinMISO, uint16_t pinSCK) {
-	_started = false;
-	_pinEN = pinEN;
-	_pinSTEP = pinStep;
-	_pinCS = pinCS;
-	_pinDIR = pinDIR;
-	uses_sw_spi = true;
-	TMC_SW_SPI.setPins(pinMOSI, pinMISO, pinSCK);
-}
+TMC2130Stepper::TMC2130Stepper(uint16_t pinEN, uint16_t pinDIR, uint16_t pinStep, uint16_t pinCS, uint16_t pinMOSI, uint16_t pinMISO, uint16_t pinSCK) :
+	_pinEN(pinEN),
+	_pinSTEP(pinStep),
+	_pinCS(pinCS),
+	_pinDIR(pinDIR),
+	uses_sw_spi(true)
+	{ TMC_SW_SPI.setPins(pinMOSI, pinMISO, pinSCK); }
 
 void TMC2130Stepper::begin() {
 #ifdef TMC2130DEBUG
@@ -44,7 +42,6 @@ void TMC2130Stepper::begin() {
 	}
 	if (_pinDIR != 0xFFFF) {
 		pinMode(_pinDIR, OUTPUT);
-		digitalWrite(_pinDIR, LOW); //LOW or HIGH
 	}
 	if (_pinSTEP != 0xFFFF) {
 		pinMode(_pinSTEP, OUTPUT);
@@ -61,8 +58,6 @@ void TMC2130Stepper::begin() {
 
 	toff(8); //off_time(8);
 	tbl(1); //blank_time(24);
-
-	_started = true;
 }
 
 void TMC2130Stepper::send2130(uint8_t addressByte, uint32_t *config) {
@@ -155,6 +150,17 @@ void TMC2130Stepper::push() {
 	XDIRECT(XDIRECT_sr);
 	VDCMIN(VDCMIN_sr);
 	CHOPCONF(CHOPCONF_sr);
+	//MSLUT0(MSLUT0_sr);
+	//MSLUT1(MSLUT1_sr);
+	//MSLUT2(MSLUT2_sr);
+	//MSLUT3(MSLUT3_sr);
+	//MSLUT4(MSLUT4_sr);
+	//MSLUT5(MSLUT5_sr);
+	//MSLUT6(MSLUT6_sr);
+	//MSLUT7(MSLUT7_sr);
+	//MSLUT0(MSLUT0_sr);
+	//MSLUT0(MSLUT0_sr);
+	//MSLUTSTART(MSLUTSTART_sr);
 	COOLCONF(COOLCONF_sr);
 	PWMCONF(PWMCONF_sr);
 	ENCM_CTRL(ENCM_CTRL_sr);
@@ -237,6 +243,62 @@ uint32_t TMC2130Stepper::VDCMIN() { return VDCMIN_sr; }
 void TMC2130Stepper::VDCMIN(uint32_t input) {
 	VDCMIN_sr = input;
 	TMC_WRITE_REG(VDCMIN);
+}
+///////////////////////////////////////////////////////////////////////////////////////
+// W: MSLUT
+uint32_t TMC2130Stepper::MSLUT0() { return MSLUT0_sr; }
+void TMC2130Stepper::MSLUT0(uint32_t input) {
+	MSLUT0_sr = input;
+	TMC_WRITE_REG(MSLUT0);
+}
+uint32_t TMC2130Stepper::MSLUT1() { return MSLUT1_sr; }
+void TMC2130Stepper::MSLUT1(uint32_t input) {
+	MSLUT1_sr = input;
+	TMC_WRITE_REG(MSLUT1);
+}
+uint32_t TMC2130Stepper::MSLUT2() { return MSLUT2_sr; }
+void TMC2130Stepper::MSLUT2(uint32_t input) {
+	MSLUT2_sr = input;
+	TMC_WRITE_REG(MSLUT2);
+}
+uint32_t TMC2130Stepper::MSLUT3() { return MSLUT3_sr; }
+void TMC2130Stepper::MSLUT3(uint32_t input) {
+	MSLUT3_sr = input;
+	TMC_WRITE_REG(MSLUT3);
+}
+uint32_t TMC2130Stepper::MSLUT4() { return MSLUT4_sr; }
+void TMC2130Stepper::MSLUT4(uint32_t input) {
+	MSLUT4_sr = input;
+	TMC_WRITE_REG(MSLUT4);
+}
+uint32_t TMC2130Stepper::MSLUT5() { return MSLUT5_sr; }
+void TMC2130Stepper::MSLUT5(uint32_t input) {
+	MSLUT0_sr = input;
+	TMC_WRITE_REG(MSLUT5);
+}
+uint32_t TMC2130Stepper::MSLUT6() { return MSLUT6_sr; }
+void TMC2130Stepper::MSLUT6(uint32_t input) {
+	MSLUT0_sr = input;
+	TMC_WRITE_REG(MSLUT6);
+}
+uint32_t TMC2130Stepper::MSLUT7() { return MSLUT7_sr; }
+void TMC2130Stepper::MSLUT7(uint32_t input) {
+	MSLUT0_sr = input;
+	TMC_WRITE_REG(MSLUT7);
+}
+///////////////////////////////////////////////////////////////////////////////////////
+// W: MSLUTSEL
+uint32_t TMC2130Stepper::MSLUTSEL() { return MSLUTSEL_sr; }
+void TMC2130Stepper::MSLUTSEL(uint32_t input) {
+	MSLUTSEL_sr = input;
+	TMC_WRITE_REG(MSLUTSEL);
+}
+///////////////////////////////////////////////////////////////////////////////////////
+// W: MSLUTSTART
+uint32_t TMC2130Stepper::MSLUTSTART() { return MSLUTSTART_sr; }
+void TMC2130Stepper::MSLUTSTART(uint32_t input) {
+	MSLUTSTART_sr = input;
+	TMC_WRITE_REG(MSLUTSTART);
 }
 ///////////////////////////////////////////////////////////////////////////////////////
 // R: MSCNT
